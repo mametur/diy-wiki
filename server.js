@@ -48,9 +48,6 @@ app.use('/', express.static(path.join(__dirname, 'client', 'build')));
 app.get('/api/page/:slug', async (req, res) => {
   const filename = slugToPath(req.params.slug);
   try {
-    // before write a file read it
-
-    const file = await readFile(filename, 'utf8');
     // console.log('File start to read', file);
     //await fs.writeFile('filename.txt', 'test');
     const body = await readFile(filename, 'utf-8');
@@ -88,7 +85,18 @@ app.post('/api/page/:slug', async (req, res) => {
 // file names do not have .md, just the name!
 //  success response: {status:'ok', pages: ['fileName', 'otherFileName']}
 //  failure response: no failure response
-app.get('/api/pages/all', async (req, res) => {});
+app.get('/api/pages/all', async (req, res) => {
+  // first read all files content
+  const pathOfData = __dirname + '/' + DATA_DIR;
+  const readDirectory = await readDir(pathOfData);
+  // remove .md from files name
+  const removedMd = [];
+
+  readDirectory.forEach((element) => {
+    removedMd.push(element.replace('.md', ''));
+  });
+  res.json({ status: 'ok', pages: removedMd });
+});
 
 // GET: '/api/tags/all'
 // sends an array of all tag names in all files, without duplicates!
