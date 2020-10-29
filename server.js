@@ -125,7 +125,7 @@ app.get('/api/tags/all', async (req, res) => {
     findTags.forEach((element) => {
       pureLetter.push(element.replace('#', ''));
     });
-    //...new Set(chars) Remove duplicates from an array using a Set
+    //...new Set(chars) Remove duplicates from an array using a Set, concat two array
     concatTags = [...new Set(tags.concat(pureLetter))];
   });
   res.json({ status: 'ok', tags: concatTags });
@@ -136,7 +136,28 @@ app.get('/api/tags/all', async (req, res) => {
 // it will send an array of all file names that contain this tag (without .md!)
 //  success response: {status:'ok', tag: 'tagName', pages: ['tagName', 'otherTagName']}
 //  failure response: no failure response
-app.get('/api/tags/:tag', async (req, res) => {});
+app.get('/api/tags/:tag', async (req, res) => {
+  const tagName = req.params.tag;
+  // first read all files
+  const pathOfData = __dirname + '/' + DATA_DIR;
+  const readDirectory = await readDir(pathOfData);
+
+  // loop over files and if tag exist then show its file
+  let tag = '';
+  let pages = [];
+  readDirectory.forEach((file) => {
+    const filePath = __dirname + '/' + DATA_DIR + '/' + file;
+
+    const body = fs.readFileSync(filePath, 'utf-8');
+    const findTags = body.match('#' + tagName);
+    if (findTags) {
+      // if tag exist write its page name
+      tag = tagName;
+      pages.push(file.replace('.md', ''));
+    }
+  });
+  res.json({ status: 'ok', tag: tag, pages: pages });
+});
 
 // this needs to be here for the frontend to create new wiki pages
 //  if the route is not one from above
