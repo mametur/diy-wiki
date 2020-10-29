@@ -86,7 +86,7 @@ app.post('/api/page/:slug', async (req, res) => {
 //  success response: {status:'ok', pages: ['fileName', 'otherFileName']}
 //  failure response: no failure response
 app.get('/api/pages/all', async (req, res) => {
-  // first read all files content
+  // first read all files name
   const pathOfData = __dirname + '/' + DATA_DIR;
   const readDirectory = await readDir(pathOfData);
   // remove .md from files name
@@ -104,7 +104,32 @@ app.get('/api/pages/all', async (req, res) => {
 // hint: use the TAG_RE regular expression to search the contents of each file
 //  success response: {status:'ok', tags: ['tagName', 'otherTagName']}
 //  failure response: no failure response
-app.get('/api/tags/all', async (req, res) => {});
+app.get('/api/tags/all', async (req, res) => {
+  // first read all files
+  const pathOfData = __dirname + '/' + DATA_DIR;
+  const readDirectory = await readDir(pathOfData);
+
+  // loop over files and get their content
+  const tags = [];
+  let concatTags = [];
+  readDirectory.forEach((file) => {
+    const filePath = __dirname + '/' + DATA_DIR + '/' + file;
+    // read file content
+    //const TAG_RE = /#\w+/g;
+    // \wFind a word character
+    // /g 	Perform a global match (find all matches rather than stopping after the first match)
+    const body = fs.readFileSync(filePath, 'utf-8');
+    const findTags = body.match(TAG_RE);
+    // remove # from words
+    const pureLetter = [];
+    findTags.forEach((element) => {
+      pureLetter.push(element.replace('#', ''));
+    });
+    //...new Set(chars) Remove duplicates from an array using a Set
+    concatTags = [...new Set(tags.concat(pureLetter))];
+  });
+  res.json({ status: 'ok', tags: concatTags });
+});
 
 // GET: '/api/tags/:tag'
 // searches through the contents of each file looking for the :tag
