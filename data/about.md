@@ -1,6 +1,5 @@
-# About
+# Your New Page
 
-This is a wiki.
+Write whatever you like here.
 
-#about #default
-
+#love
